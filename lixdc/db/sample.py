@@ -1,19 +1,23 @@
+import os
 import collections
 import pandas
 import amostra.client.commands as acc
+import lixdc
+
+path = os.path.dirname(lixdc.__file__)+"/"
 
 CONTAINER_TYPES = { "96 Well Plate": {"id": "96wp",
                                       "cols": 12,
                                       "rows": 8,
                                       "cols_letters": False,
                                       "rows_letters": True,
-                                      "image": "96wp.png"},
+                                      "image": "{}96wp.png".format(path)},
                    "12 Cells": {"id": "12cells",
                                 "cols": 6,
                                 "rows": 2,
                                 "cols_letters": False,
                                 "rows_letters": False,
-                                "image": "12cells.png"}
+                                "image": "{}12cells.png".format(path)}
                    }
 
 container_ref = acc.ContainerReference()
