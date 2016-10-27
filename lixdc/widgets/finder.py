@@ -106,7 +106,7 @@ class ContainerFinder(QtGui.QDialog, BaseWidget):
         params = dict()
 
         params['owner'] = self.app_state.user
-        params['project'] = self.app_state.project
+        params['proposal_id'] = self.app_state.proposal_id
         params['beamline_id'] = self.app_state.beamline_id
 
         if self.cmb_type.currentText() != '':
