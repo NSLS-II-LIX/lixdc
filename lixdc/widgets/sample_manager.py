@@ -139,7 +139,7 @@ class SampleManager(QtGui.QDialog, BaseWidget):
         params = dict()
 
         params['owner'] = self.app_state.user
-        params['project'] = self.app_state.project
+        params['proposal_id'] = self.app_state.proposal_id
         params['beamline_id'] = self.app_state.beamline_id
 
         if self.cmb_type.currentText() != '':
@@ -445,7 +445,7 @@ class SampleManager(QtGui.QDialog, BaseWidget):
                 plate_info = {
                     "uid": None,
                     "owner": self.app_state.user,
-                    "project": self.app_state.project,
+                    "proposal_id": self.app_state.proposal_id,
                     "beamline_id": self.app_state.beamline_id,
                     "kind": kind,
                     "name": name,
@@ -460,7 +460,7 @@ class SampleManager(QtGui.QDialog, BaseWidget):
             s_temperature = line[1][9]
             sample_info = {
                     "uid": None,
-                    "project": self.app_state.project,
+                    "proposal_id": self.app_state.proposal_id,
                     "beamline_id": self.app_state.beamline_id,
                     "owner": self.app_state.user,
                     "name": s_name,

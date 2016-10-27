@@ -162,7 +162,7 @@ class WindowlessSetup(QtGui.QWidget):
         barcode, ok = QtGui.QInputDialog.getText(self, 'Loading plate', 'Enter your plate barcode:')
         if ok:
             barcode = barcode.zfill(13)
-            plate_info = db_sample.find_plate_by_barcode(state_general.owner, state_general.project, state_general.beamline_id, barcode, fill=True)
+            plate_info = db_sample.find_plate_by_barcode(state_general.owner, state_general.proposal_id, state_general.beamline_id, barcode, fill=True)
             if plate_info is None:
                 QtGui.QMessageBox.critical(self, "Not Found", "Plate not found with barcode: {}!".format(barcode))
             else:
@@ -174,7 +174,7 @@ class WindowlessSetup(QtGui.QWidget):
         print("Importing new plate to Dock Station #", idx)
         fname = QtGui.QFileDialog.getOpenFileName(self, 'Select File to import', '~')
         if fname != "":
-            plate_info = db_sample.import_plate_from_excel(fname, state_general.owner, state_general.project, state_general.beamline_id, "96wp")
+            plate_info = db_sample.import_plate_from_excel(fname, state_general.owner, state_general.proposal_id, state_general.beamline_id, "96wp")
             self._update_screen_with_plate_info(plate_info)
 
 

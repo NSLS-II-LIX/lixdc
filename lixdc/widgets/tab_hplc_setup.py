@@ -185,7 +185,7 @@ class HPLCSetup(QtGui.QWidget):
         self.create_request()
         fname = self.compose_file()
         utils.show_information('Batch file created.',
-         'Now copy the file located at: {} to the HPLC computer and execute the batch.'.format(fname),
+         'Now copy the file located at:\n\t{}\n\nTo the HPLC computer and execute the batch.'.format(fname),
          'Success')
 
     def create_request(self):
@@ -220,7 +220,9 @@ class HPLCSetup(QtGui.QWidget):
                                     plate['name'])
         prefix = 'TBD'
         sep = '\r\n'
-        with open(fname, 'w') as f:
+        utils.makedirs(self.app_state.get_user_path())
+        full_file_path = "{}{}".format(self.app_state.get_user_path(),fname) 
+        with open(full_file_path, 'w') as f:
             f.write(''+sep)
             f.write('[Header]'+sep)
             f.write('Batch File Name\t{}\{}'.format(batch_path, fname)+sep)
@@ -381,4 +383,4 @@ class HPLCSetup(QtGui.QWidget):
                         multi_injection, barcode, sampler_file, conc_overrides
                     )
                 )
-        return fname
+        return full_file_path

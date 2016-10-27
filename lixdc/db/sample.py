@@ -3,6 +3,7 @@ import collections
 import pandas
 import amostra.client.commands as acc
 import lixdc
+from lixdc.conf import load_configuration
 
 path = os.path.dirname(lixdc.__file__)+"/"
 
@@ -20,8 +21,16 @@ CONTAINER_TYPES = { "96 Well Plate": {"id": "96wp",
                                 "image": "{}12cells.png".format(path)}
                    }
 
-container_ref = acc.ContainerReference()
-sample_ref = acc.SampleReference()
+config_params = {k: v for k, v in load_configuration('lixdc', 'LIXDC',
+                                                     [
+                                                      'amostra_host',
+                                                      'amostra_port',
+                                                      ]
+                                                     ).items() if v is not None}
+
+host, port = config_params['amostra_host'], config_params['amostra_port']
+container_ref = acc.ContainerReference(host=host, port=port)
+sample_ref = acc.SampleReference(host=host, port=port)
 
 
 def get_container_type_by_id(cont_id):
@@ -34,7 +43,6 @@ def upsert_container(cont_info):
     if 'uid' in cont_info:
         cont = cont_info['uid']
         q = {'uid': cont_info.pop('uid', '')}
-        print('Update Container with: ', cont_info)
         container_ref.update(q, cont_info)
     else:
         cont = container_ref.create(**cont_info)
@@ -51,7 +59,6 @@ def upsert_sample_list(samples):
             result.append(q['uid'])
         else:
             s.pop('uid', '')
-            print('Will Create sample: ', s)
             result.append(sample_ref.create(**s))
 
     return result
@@ -61,9 +68,10 @@ def find_containers(**kwargs):
     return list(container_ref.find(**kwargs))
 
 
-def find_container_by_barcode(owner, project, beamline_id, barcode, fill=True):
+def find_container_by_barcode(owner, proposal_id, beamline_id, barcode, fill=True):
+
     try:
-        cont_info = list(container_ref.find(owner=owner, project=project,
+        cont_info = list(container_ref.find(owner=owner, proposal_id=proposal_id,
                                              beamline_id=beamline_id,
                                              barcode=barcode))[0]
     except IndexError:

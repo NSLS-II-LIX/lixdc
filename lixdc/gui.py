@@ -7,27 +7,36 @@ from PyQt4 import QtGui, QtCore
 from .state.general import State
 from .widgets.main import MainWindow
 from .widgets.login import Login
+from .conf import load_configuration
 
+config_params = {k: v for k, v in load_configuration('lixdc', 'LIXDC',
+                                                     [
+                                                      'amostra_host',
+                                                      'amostra_port',
+                                                      'base_path'
+                                                      ]
+                                                     ).items() if v is not None}
 
 def run():
     app_state = State()
+    app_state.configs = config_params
     app = QtGui.QApplication(sys.argv)
     #print("Styles: ", QtGui.QStyleFactory.keys())
     app.setStyle(QtGui.QStyleFactory.create("Cleanlooks"))
     ### TURNS ON LOGIN SCREEN
     login = Login(app_state=app_state)
     if login.exec_() == QtGui.QDialog.Accepted:
-        #if True:
-        print("After Login App State: ", app_state)
         main = MainWindow(app_state=app_state)
         sys.exit(app.exec_())
 
-def run_ipython(username, project):
-    if username == '' or project == '':
-        raise Exception('Illegal username or project. Please check.')
+def run_ipython(username, proposal, run):
+    if username == '' or proposal == '' or run == '':
+        raise Exception('Illegal username, proposal or run. Please check.')
     app_state = State()
+    app_state.configs = config_params
     app_state.user = username
-    app_state.project = project
+    app_state.proposal_id = proposal
+    app_state.run_id = run
     app_state.login_timestamp = time.time()
     params = {'app_state': app_state}
     main = create_window(MainWindow, **params)

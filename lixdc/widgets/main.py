@@ -20,12 +20,12 @@ class MainWindow(QtGui.QMainWindow, BaseWidget):
         self.setStatusBar(self.status_bar)
 
         self.lbl_user_data = QtGui.QLabel()
-        user_data_str = "Logged in at: {} as {} | Project: {}"
+        user_data_str = "Logged in at: {} as {} | Proposal: {}"
         fmt_date = datetime.fromtimestamp(self.app_state.login_timestamp)
         fmt_date = fmt_date.strftime("%D %H:%M:%S")
         self.lbl_user_data.text = user_data_str.format(fmt_date,
                                                        self.app_state.user,
-                                                       self.app_state.project)
+                                                       self.app_state.proposal_id)
         self.status_bar.addWidget(self.lbl_user_data,1)
 
 
