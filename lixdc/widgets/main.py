@@ -1,19 +1,33 @@
-from PyQt4 import QtGui
-from lixdc.widgets import icons
-from lixdc.widgets.tab_windowless_setup import WindowlessSetup
-from lixdc.widgets.tab_flowcell_setup import FlowCellSetup
-from lixdc.widgets.tab_flowmixer_setup import FlowMixerSetup
-from lixdc.widgets.tab_hplc_setup import HPLCSetup
+from datetime import datetime
+from PyQt4 import QtGui, QtCore
+from . import icons
+from .base import BaseWidget
+from .sample_manager import SampleManager
+from .data_collection import DataCollection
 
 
-class MainWindow(QtGui.QMainWindow):
-    def __init__(self):
+class MainWindow(QtGui.QMainWindow, BaseWidget):
+    def __init__(self, app_state=None):
         super(MainWindow, self).__init__()
+        self.app_state = app_state
+        self.main_widget = QtGui.QWidget(self)
         self.init_ui()
+        self.setFixedSize(350, 350)
         # self.initCallbacks()
 
     def init_ui(self):
-        self.statusBar()
+        self.status_bar = QtGui.QStatusBar()
+        self.setStatusBar(self.status_bar)
+
+        self.lbl_user_data = QtGui.QLabel()
+        user_data_str = "Logged in at: {} as {} | Project: {}"
+        fmt_date = datetime.fromtimestamp(self.app_state.login_timestamp)
+        fmt_date = fmt_date.strftime("%D %H:%M:%S")
+        self.lbl_user_data.text = user_data_str.format(fmt_date,
+                                                       self.app_state.user,
+                                                       self.app_state.project)
+        self.status_bar.addWidget(self.lbl_user_data,1)
+
 
         menu_bar = self.menuBar()
         menu_bar.setNativeMenuBar(False)  # Handles OSX issues with MenuBar
@@ -22,49 +36,76 @@ class MainWindow(QtGui.QMainWindow):
         exitAction.setShortcut('Ctrl+Q')
         exitAction.setStatusTip('Exit the application')
         exitAction.triggered.connect(self.close)
-
         fileMenu.addAction(exitAction)
 
-        self.create_tabs()
+        self.create_buttons()
 
         self.setWindowTitle('LIX Data Collection')
         self.center()
-        self.showMaximized()
+        #self.showMaximized()
         self.show()
 
-    def create_tabs(self):
-        tab_widget = QtGui.QTabWidget()
+    def create_buttons(self):
 
-        tab1 = WindowlessSetup()
-        tab2 = FlowCellSetup()
-        tab3 = FlowMixerSetup()
-        tab4 = HPLCSetup()
+        layout = QtGui.QGridLayout()
+        self.main_widget.setLayout(layout)
 
-        tab_widget.addTab(tab1, "Windowless Setup")
-        tab_widget.addTab(tab2, "Flow Cell Setup")
-        tab_widget.addTab(tab3, "Flow Mixer Setup")
-        tab_widget.addTab(tab4, "HPLC")
-        self.setCentralWidget(tab_widget)
+        btn_size = ((40, 40), (200, 200))  # Min and Max
 
+        btn_sample = QtGui.QPushButton()
+        btn_sample.setMinimumSize(btn_size[0][0], btn_size[0][1])
+        btn_sample.setMaximumSize(btn_size[1][0], btn_size[1][1])
+        btn_sample.connect(btn_sample, QtCore.SIGNAL('clicked()'), self.handle_open_sample)
+        btn_sample.setIcon(QtGui.QIcon(icons.SAMPLE))
+        btn_sample_hint = "Sample Manager"
+        btn_sample.setText(btn_sample_hint)
+        btn_sample.setStatusTip(btn_sample_hint)
 
-    def center(self):
-        screen = QtGui.QApplication.desktop().screenNumber(QtGui.QApplication.desktop().cursor().pos())
-        center_point = QtGui.QApplication.desktop().screenGeometry(screen).center()
-        available_rect = QtGui.QApplication.desktop().availableGeometry(screen)
+        btn_dc = QtGui.QPushButton()
+        btn_dc.setMinimumSize(btn_size[0][0], btn_size[0][1])
+        btn_dc.setMaximumSize(btn_size[1][0], btn_size[1][1])
+        btn_dc.connect(btn_dc, QtCore.SIGNAL('clicked()'), self.handle_open_dc)
+        btn_dc.setIcon(QtGui.QIcon(icons.DATA_COLLECTION))
+        btn_dc_hint = "Data Collection"
+        btn_dc.setText(btn_dc_hint)
+        btn_dc.setStatusTip(btn_dc_hint)
 
-        x = 0
-        y = available_rect.y()
-        w = available_rect.width()
-        h = available_rect.height()
+        btn_dp = QtGui.QPushButton()
+        btn_dp.setMinimumSize(btn_size[0][0], btn_size[0][1])
+        btn_dp.setMaximumSize(btn_size[1][0], btn_size[1][1])
+        btn_dp.connect(btn_dp, QtCore.SIGNAL('clicked()'), self.handle_open_dp)
+        btn_dp.setIcon(QtGui.QIcon(icons.DATA_PROCESSING))
+        btn_dp_hint = "Data Processing"
+        btn_dp.setText(btn_dp_hint)
+        btn_dp.setStatusTip(btn_dp_hint)
+        btn_dp.setDisabled(True) # TODO: Remove when implemented
 
-        w_factor = 0.8
-        h_factor = 0.8
-        w = int((w - x) * w_factor)
-        h = int((h - y) * h_factor)
+        btn_dv = QtGui.QPushButton()
+        btn_dv.setMinimumSize(btn_size[0][0], btn_size[0][1])
+        btn_dv.setMaximumSize(btn_size[1][0], btn_size[1][1])
+        btn_dv.connect(btn_dv, QtCore.SIGNAL('clicked()'), self.handle_open_dv)
+        btn_dv.setIcon(QtGui.QIcon(icons.DATA_VIEWER))
+        btn_dv_hint = "Data Viewer"
+        btn_dv.setText(btn_dv_hint)
+        btn_dv.setStatusTip(btn_dv_hint)
+        btn_dv.setDisabled(True) # TODO: Remove when implemented
 
-        self.setGeometry(0, 0, w, h)
+        layout.addWidget(btn_sample, 1, 1)
+        layout.addWidget(btn_dc, 1, 3)
+        layout.addWidget(btn_dp, 3, 1)
+        layout.addWidget(btn_dv, 3, 3)
 
-        frame_geom = self.frameGeometry()
-        frame_geom.moveCenter(center_point)
+        layout.sizeConstraint = QtGui.QLayout.SetDefaultConstraint
+        self.setCentralWidget(self.main_widget)
 
-        self.move(frame_geom.topLeft())
+    def handle_open_sample(self):
+        s_manager = SampleManager(parent=self, app_state=self.app_state)
+
+    def handle_open_dc(self):
+        s_collection = DataCollection(parent=self, app_state=self.app_state)
+
+    def handle_open_dp(self):
+        pass
+
+    def handle_open_dv(self):
+        pass
